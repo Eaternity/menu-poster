@@ -1,0 +1,45 @@
+{
+  "name": "menu-poster",
+  "version": "1.0.0",
+  "description": "script fot batch posting menus to the eaternity-app node backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "nodemon index.js",
+    "lint": "eslint -c .eslintrc.json .",
+    "format": "prettier-eslint --write '**/*.js' '**/*.json'",
+    "precommit": "lint-staged"
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "*.{js,json}": [
+      "prettier-eslint --write",
+      "eslint -c .eslintrc.json",
+      "git add"
+    ]
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.2",
+    "eslint": "^4.16.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-json": "^1.2.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-prettier": "^2.6.0",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-react": "^7.6.1",
+    "eslint-plugin-standard": "^3.0.1",
+    "husky": "^0.14.3",
+    "jest": "^22.4.2",
+    "lint-staged": "^7.0.0",
+    "nodemon": "^1.17.3",
+    "prettier": "^1.11.1",
+    "prettier-eslint": "^8.8.1",
+    "prettier-eslint-cli": "^4.7.1"
+  },
+  "dependencies": {
+    "csvtojson": "^1.1.9",
+    "uninstall": "0.0.0"
+  }
+}
