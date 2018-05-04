@@ -2,10 +2,10 @@
   "name": "menu-poster",
   "version": "1.0.0",
   "description": "script fot batch posting menus to the eaternity-app node backend",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "jest",
-    "start": "nodemon index.js",
+    "start": "nodemon src/index.js",
     "lint": "eslint -c .eslintrc.json .",
     "format": "prettier-eslint --write '**/*.js' '**/*.json'",
     "precommit": "lint-staged"
@@ -40,6 +40,8 @@
   },
   "dependencies": {
     "csvtojson": "^1.1.9",
+    "moment": "^2.22.1",
+    "ramda": "^0.25.0",
     "uninstall": "0.0.0"
   }
 }
