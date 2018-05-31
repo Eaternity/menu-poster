@@ -20,9 +20,9 @@ const {
 } = require('./utils')
 const {api} = require('./api')
 
-const csvFilePath = './data/willemDrees.csv'
+const csvFilePath = './data/test.csv'
 
-const main = async ({jwt, menuCollectionId, productCollectionId}) => {
+const main = async ({baseUrl, jwt, menuCollectionId, productCollectionId}) => {
   const rowArray = await csv({
     delimiter: ';',
     noheader: false,
@@ -162,7 +162,7 @@ const main = async ({jwt, menuCollectionId, productCollectionId}) => {
           // slow things down a bit
           delay(200),
           mergeMap(product => {
-            return api.postProduct({jwt, product}).pipe(
+            return api.postProduct({baseUrl, jwt, product}).pipe(
               map(() => {
                 console.log('product posted')
                 return menusWithUniqueProductIds
@@ -174,13 +174,15 @@ const main = async ({jwt, menuCollectionId, productCollectionId}) => {
       takeLast(1),
       delay(200),
       mergeMap(menus => {
+        console.log(menus)
+
         const menuSource = from(menus)
 
         return menuSource.pipe(
           // slow things down a bit
           delay(200),
           mergeMap(menu => {
-            return api.postMenu({jwt, menu}).pipe(
+            return api.postMenu({baseUrl, jwt, menu}).pipe(
               map(() => {
                 console.log('menu posted')
               })
@@ -193,9 +195,18 @@ const main = async ({jwt, menuCollectionId, productCollectionId}) => {
     .subscribe()
 }
 
+// const mmunderAtCarrot = {
+//   baseUrl: 'https://carrot.eaternity.ch',
+//   menuCollectionId: '5d8ad331-e39e-4a8d-be30-d1963dd10754',
+//   productCollectionId: '9397ee78-b6b8-4e7d-b373-021dbfa41905',
+//   jwt:
+//     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjczNDMzZGNhLTQwMzYtNGM4OS05NTI3LTA4NTA0MzYwMTRhNCIsImlhdCI6MTUyNzc3NjkwOCwiZXhwIjoxNTI3ODYzMzA4fQ.JyM8jpIsnleQzDDog25UEHs3QuGP8mxehas82s_Z5YQ'
+// }
+
 main({
-  menuCollectionId: '85b5791c-d417-4217-8ea9-65a9c2ff1f8d',
-  productCollectionId: '0561c215-ee90-43c6-80b9-550fcb438d07',
+  baseUrl: 'http://localhost:5001',
+  menuCollectionId: 'af6e444c-8fdd-4ed2-a13c-6f478cf267aa',
+  productCollectionId: 'ac15ae68-c918-4ce8-8e57-0a1479abaeb1',
   jwt:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI5Y2M1OTEyLTg5ZDktNDQ3OS1iZGY2LTVkMmM5MWJlZGQ3MiIsImlhdCI6MTUyNzc2MDgxNSwiZXhwIjoxNTMwMzUyODE1fQ.xikAvhEjrkLVkIY82RgpsB9HiaD4yQlKSdPED6BZqWc'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU0YTIxNGI5LTRmYTItNDNmMS05ZjlkLWM4YTg0MWZhZjllMCIsImlhdCI6MTUyNzc3NzQ1MiwiZXhwIjoxNTMwMzY5NDUyfQ.QGn-NhwBQwIOjbKNK6usXyclyfwwGKd-aMwX-zEnsn4'
 })

@@ -6,18 +6,18 @@ const generateHeaders = jwt => ({
 })
 
 module.exports.api = {
-  postMenu: ({jwt, menu}) => {
+  postMenu: ({baseUrl, jwt, menu}) => {
     return request({
-      url: 'http://localhost:5001/api/menus',
+      url: `${baseUrl}/api/menus`,
       headers: generateHeaders(jwt),
       method: 'POST',
       body: menu
     })
   },
 
-  postProduct: ({jwt, product}) => {
+  postProduct: ({baseUrl, jwt, product}) => {
     return request({
-      url: 'http://localhost:5001/api/products',
+      url: `${baseUrl}/api/products`,
       headers: generateHeaders(jwt),
       method: 'POST',
       body: product
