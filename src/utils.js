@@ -2,12 +2,16 @@ const moment = require('moment')
 
 const {v4} = require('uuid')
 
-module.exports.generateProduct = ({title, productCollectionId}) => ({
+module.exports.generateProduct = ({
+  configurationPossibilities,
+  title,
+  productCollectionId
+}) => ({
   id: v4(),
   title,
   type: 'product',
   productCollectionId,
-  configurationPossibilities: {}
+  configurationPossibilities
 })
 
 module.exports.generateProductionDate = week => {
@@ -57,7 +61,7 @@ module.exports.generateMenu = ({
   productionDate,
   menuLineId,
   menuLineTitle: '',
-  servings: 1,
+  servings: 4,
   serviceStatus: {
     cloudStatus: cloudStatus || 200
   },

@@ -20,7 +20,7 @@ const {
 } = require('./utils')
 const {api} = require('./api')
 
-const csvFilePath = './data/test.csv'
+const csvFilePath = './data/willemDrees.csv'
 
 const main = async ({jwt, menuCollectionId, productCollectionId}) => {
   const rowArray = await csv({
@@ -57,10 +57,25 @@ const main = async ({jwt, menuCollectionId, productCollectionId}) => {
         const [{menuTitle, productionDate}] = dataGroupedByMenu
 
         const components = dataGroupedByMenu.map(
-          ({ingredientAmount, ingredientTitle}) => {
+          ({
+            ingredientAmount,
+            ingredientTitle,
+            origin,
+            preservation,
+            processing,
+            production,
+            transport
+          }) => {
             const product = generateProduct({
               title: ingredientTitle,
-              productCollectionId
+              productCollectionId,
+              configurationPossibilities: {
+                origin,
+                transport,
+                production,
+                preservation,
+                processing
+              }
             })
 
             return generateComponent({amount: ingredientAmount, product})
