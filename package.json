@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "jest",
-    "start": "nodemon src/index.js",
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
     "lint": "eslint -c .eslintrc.json .",
     "format": "prettier-eslint --write '**/*.js' '**/*.json'",
     "precommit": "lint-staged"
@@ -19,29 +20,30 @@
     ]
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.2",
-    "eslint": "^4.16.0",
+    "babel-eslint": "^8.2.3",
+    "eslint": "^4.19.1",
     "eslint-config-prettier": "^2.9.0",
-    "eslint-config-standard": "^11.0.0-beta.0",
-    "eslint-plugin-import": "^2.8.0",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.12.0",
     "eslint-plugin-json": "^1.2.0",
-    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-prettier": "^2.6.0",
-    "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-react": "^7.6.1",
-    "eslint-plugin-standard": "^3.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-react": "^7.8.2",
+    "eslint-plugin-standard": "^3.1.0",
     "husky": "^0.14.3",
-    "jest": "^22.4.2",
-    "lint-staged": "^7.0.0",
-    "nodemon": "^1.17.3",
-    "prettier": "^1.11.1",
+    "jest": "^23.0.1",
+    "lint-staged": "^7.1.2",
+    "nodemon": "^1.17.5",
+    "prettier": "^1.13.2",
     "prettier-eslint": "^8.8.1",
     "prettier-eslint-cli": "^4.7.1"
   },
   "dependencies": {
-    "csvtojson": "^1.1.9",
+    "csvtojson": "^2.0.3",
     "moment": "^2.22.1",
     "ramda": "^0.25.0",
-    "uninstall": "0.0.0"
+    "rxjs": "^6.2.0",
+    "universal-rxjs-ajax": "^2.0.0"
   }
 }

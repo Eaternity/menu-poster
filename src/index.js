@@ -1,115 +1,186 @@
-const fs = require('fs')
-
+const {
+  catchError,
+  delay,
+  groupBy,
+  map,
+  mergeMap,
+  takeLast,
+  toArray
+} = require('rxjs/operators')
+const {from} = require('rxjs')
+const {uniqBy} = require('ramda')
 const csv = require('csvtojson')
 
-const {generateProductionDate, generateStandardProduct} = require('./utils')
+const {
+  adjustProductionDate,
+  generateComponent,
+  generateMenu,
+  generateProduct,
+  generateProductionDate
+} = require('./utils')
+const {api} = require('./api')
 
-const csvFilePath = './data/willemDrees.csv'
-const csvReadStream = fs.createReadStream(csvFilePath, {encoding: 'utf8'})
+const csvFilePath = './data/test.csv'
 
-let allProducts = []
-let allMenus = []
-let menu = {
-  components: []
+const main = async ({jwt, menuCollectionId, productCollectionId}) => {
+  const rowArray = await csv({
+    delimiter: ';',
+    noheader: false,
+    trim: true
+  }).fromFile(csvFilePath)
+
+  const source = from(rowArray)
+
+  source
+    .pipe(
+      // comvert row data into right format
+      map(jsonRow => {
+        const rowWithCorrectKeys = {
+          ingredientAmount: jsonRow['4 people (g)'],
+          menuTitle: jsonRow['Recipe'],
+          ingredientTitle: jsonRow['Ingredient (database)'],
+          productionDate: generateProductionDate(jsonRow['week']),
+          origin: jsonRow['Origin'],
+          transport: jsonRow['Transport'],
+          production: jsonRow['Production'],
+          preservation: jsonRow['Preservation'],
+          processing: jsonRow['Processing']
+        }
+
+        return rowWithCorrectKeys
+      }),
+      // group row data by menu title
+      groupBy(({menuTitle}) => menuTitle),
+      mergeMap(group => group.pipe(toArray())),
+      // extract components and generate a menu from each group
+      map(dataGroupedByMenu => {
+        const [{menuTitle, productionDate}] = dataGroupedByMenu
+
+        const components = dataGroupedByMenu.map(
+          ({ingredientAmount, ingredientTitle}) => {
+            const product = generateProduct({
+              title: ingredientTitle,
+              productCollectionId
+            })
+
+            return generateComponent({amount: ingredientAmount, product})
+          }
+        )
+
+        return generateMenu({
+          components,
+          title: menuTitle,
+          productionDate,
+          menuCollectionId
+        })
+      }),
+      // group menu collection by production date because there is only one
+      // date coming from the week given in the original data
+      groupBy(({productionDate}) => productionDate),
+      mergeMap(group => group.pipe(toArray())),
+      // map over menus grouped by production date and use index as menuLineId
+      // TODO: distribute menus over all days of the week
+      map(menusGroupedByProductionDate => {
+        const menusWithMenuLineInfo = menusGroupedByProductionDate.map(
+          (menu, index) => {
+            // TODO: Spread menus out over the week to show them allProducts
+            const menuLineId = index + 1
+            const correctedMenuLineId =
+              menuLineId % 3 === 0 ? 3 : menuLineId % 3
+
+            return {
+              ...menu,
+              menuLineId: correctedMenuLineId,
+              menuLineTitle: `Box ${menuLineId}`,
+              productionDate: adjustProductionDate({
+                menuLineId,
+                productionDate: menu.productionDate
+              })
+            }
+          }
+        )
+
+        return menusWithMenuLineInfo
+      }),
+      // get rid of the productionDate grouping
+      toArray(),
+      // extract unique products and post them all, the post menus
+      mergeMap(menus => {
+        const allMenus = menus.reduce((prev, curr) => [...prev, ...curr])
+
+        const allProducts = allMenus.reduce(
+          (acc, menu) => [
+            ...acc,
+            ...menu.components.map(({component}) => component)
+          ],
+          []
+        )
+
+        const uniqueProducts = uniqBy(product => product.title, allProducts)
+
+        // Correct the product id! The menu potentiall contains
+        // products with null pointer ids because the products where
+        // made unique... Could for sure be done more elegantly by
+        // keeping track of all products from the beginning but I
+        // can't be bothered atm
+        const menusWithUniqueProductIds = allMenus.map(menu => {
+          const {components} = menu
+          const componentsWithUniqueProductIds = components.map(component => {
+            const uniqueProduct = uniqueProducts.find(
+              product => product.title === component.component.title
+            )
+            return {
+              ...component,
+              component: uniqueProduct
+            }
+          })
+
+          return {
+            ...menu,
+            components: componentsWithUniqueProductIds
+          }
+        })
+
+        const productSource = from(uniqueProducts)
+
+        return productSource.pipe(
+          // slow things down a bit
+          delay(200),
+          mergeMap(product => {
+            return api.postProduct({jwt, product}).pipe(
+              map(() => {
+                console.log('product posted')
+                return menusWithUniqueProductIds
+              })
+            )
+          })
+        )
+      }),
+      takeLast(1),
+      delay(200),
+      mergeMap(menus => {
+        const menuSource = from(menus)
+
+        return menuSource.pipe(
+          // slow things down a bit
+          delay(200),
+          mergeMap(menu => {
+            return api.postMenu({jwt, menu}).pipe(
+              map(() => {
+                console.log('menu posted')
+              })
+            )
+          })
+        )
+      }),
+      catchError(err => console.error(err))
+    )
+    .subscribe()
 }
 
-csv({delimiter: ';', noheader: false, trim: true})
-  .fromStream(csvReadStream)
-  .on('csv', csvRowArray => {
-    const numCols = csvRowArray.length
-
-    if (numCols !== 12) {
-      throw new Error('different number of colums detected')
-    }
-
-    // remove willem en drees specific columns
-    const rowWithRelevantCols = [
-      ...csvRowArray.slice(0, 2),
-      ...csvRowArray.slice(3, 4),
-      ...csvRowArray.slice(5)
-    ]
-
-    const fieldsMap = {
-      0: 'week',
-      1: 'menuTitle',
-      2: 'productTitle',
-      3: 'origin',
-      4: 'transport',
-      5: 'production',
-      6: 'greenhouse',
-      7: 'preservation',
-      8: 'processing',
-      9: 'amount'
-    }
-
-    const jsonRow = rowWithRelevantCols
-      .map((cellContent, colIndex) => ({
-        [fieldsMap[colIndex]]: cellContent
-      }))
-      .reduce((prev, curr) => ({...prev, ...curr}), {})
-
-    const {
-      menuTitle,
-      productTitle,
-      origin,
-      transport,
-      production,
-      greenhouse,
-      preservation,
-      processing,
-      week
-    } = jsonRow
-
-    const product = {
-      ...generateStandardProduct({
-        title: productTitle,
-        //TODO: manually get productCollectionId from database...
-        productCollectionId: 'test id'
-      }),
-      configurationPossibilities: {
-        origin,
-        transport,
-        production,
-        greenhouse,
-        preservation,
-        processing
-      }
-    }
-
-    //TODO: while?! same menu title collect products in menus components, then
-    // push to all menus
-    //TODO: manually get menuCollectionId from database...
-    // menu = {
-    //   ...menu,
-    //   title: menuTitle,
-    //   productionDate: generateProductionDate(week),
-    //   components: [
-    //     ...menu.components,
-    //     {
-    //       section: '',
-    //       component: product
-    //     }
-    //   ]
-    // }
-
-    allProducts.push(product)
-  })
-  .on('done', error => {
-    if (error) {
-      console.error(error)
-    }
-    console.log(allProducts)
-    console.log(allMenus)
-
-    // const uniqueProducts = uniqBy(product => product.title)(allProducts)
-
-    // TODO: post all unique products, then post all menus
-    // use {request} from universal-rxjs-ajax?! like in eaternity-app api?!
-    // you could then do:
-    // const source = Observable.of(allProducts).pipe(
-    //   map(product => request(...))
-    // )
-    //
-    // you can then wait until all products are posted, then post menus... also
-    // easy to throttle, delay etc to not post too fast
-  })
+main({
+  menuCollectionId: '85b5791c-d417-4217-8ea9-65a9c2ff1f8d',
+  productCollectionId: '0561c215-ee90-43c6-80b9-550fcb438d07',
+  jwt:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI5Y2M1OTEyLTg5ZDktNDQ3OS1iZGY2LTVkMmM5MWJlZGQ3MiIsImlhdCI6MTUyNzc2MDgxNSwiZXhwIjoxNTMwMzUyODE1fQ.xikAvhEjrkLVkIY82RgpsB9HiaD4yQlKSdPED6BZqWc'
+})
