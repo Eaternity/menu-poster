@@ -1,12 +1,4 @@
-const {
-  catchError,
-  delay,
-  groupBy,
-  map,
-  mergeMap,
-  takeLast,
-  toArray
-} = require('rxjs/operators')
+const {catchError, groupBy, map, mergeMap, toArray} = require('rxjs/operators')
 const {from} = require('rxjs')
 const {uniqBy} = require('ramda')
 const csv = require('csvtojson')
@@ -18,9 +10,9 @@ const {
   generateProduct,
   generateProductionDate
 } = require('./utils')
-const {api} = require('./api')
+const {postProductsThenPostMenus} = require('./postProductsThenPostMenus')
 
-const csvFilePath = './data/test.csv'
+const csvFilePath = './data/willemDrees.csv'
 
 const main = async ({baseUrl, jwt, menuCollectionId, productCollectionId}) => {
   const rowArray = await csv({
@@ -119,80 +111,50 @@ const main = async ({baseUrl, jwt, menuCollectionId, productCollectionId}) => {
       }),
       // get rid of the productionDate grouping
       toArray(),
-      // extract unique products and post them all, the post menus
-      mergeMap(menus => {
-        const allMenus = menus.reduce((prev, curr) => [...prev, ...curr])
+      map(menus => menus.reduce((prev, curr) => [...prev, ...curr])),
+      catchError(err => console.error(err))
+    )
+    .subscribe(menus => {
+      const allProducts = menus.reduce(
+        (acc, menu) => [
+          ...acc,
+          ...menu.components.map(({component}) => component)
+        ],
+        []
+      )
 
-        const allProducts = allMenus.reduce(
-          (acc, menu) => [
-            ...acc,
-            ...menu.components.map(({component}) => component)
-          ],
-          []
-        )
+      const uniqueProducts = uniqBy(product => product.title, allProducts)
 
-        const uniqueProducts = uniqBy(product => product.title, allProducts)
-
-        // Correct the product id! The menu potentiall contains
-        // products with null pointer ids because the products where
-        // made unique... Could for sure be done more elegantly by
-        // keeping track of all products from the beginning but I
-        // can't be bothered atm
-        const menusWithUniqueProductIds = allMenus.map(menu => {
-          const {components} = menu
-          const componentsWithUniqueProductIds = components.map(component => {
-            const uniqueProduct = uniqueProducts.find(
-              product => product.title === component.component.title
-            )
-            return {
-              ...component,
-              component: uniqueProduct
-            }
-          })
-
+      // Correct the product id! The menu potentiall contains
+      // products with null pointer ids because the products where
+      // made unique... Could for sure be done more elegantly by
+      // keeping track of all products from the beginning but I
+      // can't be bothered atm
+      const menusWithUniqueProductIds = menus.map(menu => {
+        const {components} = menu
+        const componentsWithUniqueProductIds = components.map(component => {
+          const uniqueProduct = uniqueProducts.find(
+            product => product.title === component.component.title
+          )
           return {
-            ...menu,
-            components: componentsWithUniqueProductIds
+            ...component,
+            component: uniqueProduct
           }
         })
 
-        const productSource = from(uniqueProducts)
+        return {
+          ...menu,
+          components: componentsWithUniqueProductIds
+        }
+      })
 
-        return productSource.pipe(
-          // slow things down a bit
-          delay(200),
-          mergeMap(product => {
-            return api.postProduct({baseUrl, jwt, product}).pipe(
-              map(() => {
-                console.log('product posted')
-                return menusWithUniqueProductIds
-              })
-            )
-          })
-        )
-      }),
-      takeLast(1),
-      delay(200),
-      mergeMap(menus => {
-        console.log(menus)
-
-        const menuSource = from(menus)
-
-        return menuSource.pipe(
-          // slow things down a bit
-          delay(200),
-          mergeMap(menu => {
-            return api.postMenu({baseUrl, jwt, menu}).pipe(
-              map(() => {
-                console.log('menu posted')
-              })
-            )
-          })
-        )
-      }),
-      catchError(err => console.error(err))
-    )
-    .subscribe()
+      postProductsThenPostMenus({
+        baseUrl,
+        jwt,
+        menus: menusWithUniqueProductIds,
+        products: uniqueProducts
+      })
+    })
 }
 
 // const mmunderAtCarrot = {
