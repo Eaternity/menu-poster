@@ -4,7 +4,7 @@ const {uniqBy} = require('ramda')
 const csv = require('csvtojson')
 
 const {
-  adjustProductionDate,
+  adjustProductionDateAndMenuLineId,
   generateComponent,
   generateMenu,
   generateProduct,
@@ -92,14 +92,11 @@ const main = async ({baseUrl, jwt, menuCollectionId, productCollectionId}) => {
           (menu, index) => {
             // TODO: Spread menus out over the week to show them allProducts
             const menuLineId = index + 1
-            const correctedMenuLineId =
-              menuLineId % 3 === 0 ? 3 : menuLineId % 3
 
             return {
               ...menu,
-              menuLineId: correctedMenuLineId,
               menuLineTitle: `Box ${menuLineId}`,
-              productionDate: adjustProductionDate({
+              ...adjustProductionDateAndMenuLineId({
                 menuLineId,
                 productionDate: menu.productionDate
               })
