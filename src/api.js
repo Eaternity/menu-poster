@@ -5,13 +5,18 @@ const generateHeaders = jwt => ({
   jwt
 })
 
+const generateOptions = ({jwt, body}) => ({
+  method: 'POST',
+  body: JSON.stringify(body),
+  headers: generateHeaders(jwt),
+  // api exposed by fetc-retry:
+  retries: 10,
+  retryDelay: 1000
+})
+
 module.exports.api = {
   postMenu: ({baseUrl, jwt, menu}) =>
-    fetch(`${baseUrl}/api/menus`, {
-      method: 'POST',
-      body: JSON.stringify(menu),
-      headers: generateHeaders(jwt)
-    })
+    fetch(`${baseUrl}/api/menus`, generateOptions({jwt, body: menu}))
       .then(res => {
         console.log(`Menu: "${menu.title}" posted successfully`)
         return res
@@ -22,11 +27,7 @@ module.exports.api = {
       }),
 
   postProduct: ({baseUrl, jwt, product}) =>
-    fetch(`${baseUrl}/api/products`, {
-      method: 'POST',
-      body: JSON.stringify(product),
-      headers: generateHeaders(jwt)
-    })
+    fetch(`${baseUrl}/api/products`, generateOptions({jwt, body: product}))
       .then(res => {
         console.log(`Product: "${product.title}" posted successfully`)
         return res

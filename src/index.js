@@ -157,18 +157,10 @@ const main = async ({baseUrl, jwt, menuCollectionId, productCollectionId}) => {
     })
 }
 
-// const mmunderAtCarrot = {
-//   baseUrl: 'https://carrot.eaternity.ch',
-//   menuCollectionId: '5d8ad331-e39e-4a8d-be30-d1963dd10754',
-//   productCollectionId: '9397ee78-b6b8-4e7d-b373-021dbfa41905',
-//   jwt:
-//     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjczNDMzZGNhLTQwMzYtNGM4OS05NTI3LTA4NTA0MzYwMTRhNCIsImlhdCI6MTUyNzc3NjkwOCwiZXhwIjoxNTI3ODYzMzA4fQ.JyM8jpIsnleQzDDog25UEHs3QuGP8mxehas82s_Z5YQ'
-// }
-
 main({
-  baseUrl: 'http://localhost:5001',
-  menuCollectionId: 'af6e444c-8fdd-4ed2-a13c-6f478cf267aa',
-  productCollectionId: 'ac15ae68-c918-4ce8-8e57-0a1479abaeb1',
+  baseUrl: 'https://carrot.eaternity.ch',
+  menuCollectionId: '2ca26df3-7947-482f-80b8-430b1de424a8',
+  productCollectionId: 'e2273b22-7b66-4920-a134-63ae9f0864af',
   jwt:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU0YTIxNGI5LTRmYTItNDNmMS05ZjlkLWM4YTg0MWZhZjllMCIsImlhdCI6MTUyNzc3NzQ1MiwiZXhwIjoxNTMwMzY5NDUyfQ.QGn-NhwBQwIOjbKNK6usXyclyfwwGKd-aMwX-zEnsn4'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiIiwiZW1haWwiOiJtbXVuZGVyQGVhdGVybml0eS5jaCIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiIn0sImlhdCI6MTUyODExOTI5NiwiZXhwIjoxNTI4MjA1Njk2fQ.FcYbvRvXSreIHE69WZJr6IB3dtuwORVHKLuCJ8NTSFI'
 })

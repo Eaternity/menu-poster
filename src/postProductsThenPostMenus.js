@@ -8,9 +8,19 @@ module.exports.postProductsThenPostMenus = async ({
 }) => {
   await Promise.all(
     products.map(product => api.postProduct({baseUrl, jwt, product}))
-  ).catch(err => console.error('Error posting product', err))
+  )
+    .then(responses => {
+      console.log('-----------------------------------------------------------')
+      console.log(`All ${responses.length} unique products posted successfully`)
+      console.log('-----------------------------------------------------------')
+    })
+    .catch(err => console.error('Error posting products', err))
 
-  await Promise.all(
-    menus.map(menu => api.postMenu({baseUrl, jwt, menu}))
-  ).catch(err => console.error('Error posting menu', err))
+  await Promise.all(menus.map(menu => api.postMenu({baseUrl, jwt, menu})))
+    .then(responses => {
+      console.log('-----------------------------------------------------------')
+      console.log(`All ${responses.length} menus posted successfully`)
+      console.log('-----------------------------------------------------------')
+    })
+    .catch(err => console.error('Error posting menus', err))
 }
