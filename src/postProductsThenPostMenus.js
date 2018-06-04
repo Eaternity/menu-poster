@@ -10,29 +10,17 @@ module.exports.postProductsThenPostMenus = async ({
     products.map(product => api.postProduct({baseUrl, jwt, product}))
   )
     .then(responses => {
-      console.log('-----------------------------------------------------------')
-      console.log(`All ${responses.length} unique products posted successfully`)
-      console.log('-----------------------------------------------------------')
-
-      responses.forEach(res => {
-        if (res.status !== 201) {
-          console.log(res)
-        }
-      })
+      console.log('---------------------------------------------------------')
+      console.log(`All ${responses.length} products posted successfully`)
+      console.log('---------------------------------------------------------')
     })
     .catch(err => console.error('Error posting products', err))
 
   await Promise.all(menus.map(menu => api.postMenu({baseUrl, jwt, menu})))
     .then(responses => {
-      console.log('-----------------------------------------------------------')
+      console.log('---------------------------------------------------------')
       console.log(`All ${responses.length} menus posted successfully`)
-      console.log('-----------------------------------------------------------')
-
-      responses.forEach(res => {
-        if (res.status !== 201) {
-          console.log(res)
-        }
-      })
+      console.log('---------------------------------------------------------')
     })
     .catch(err => console.error('Error posting menus', err))
 }

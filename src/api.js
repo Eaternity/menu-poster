@@ -1,22 +1,26 @@
-const fetch = require('fetch-retry')
+const request = require('requestretry')
 
 const generateHeaders = jwt => ({
   'Content-Type': 'application/json',
   jwt
 })
 
-const generateOptions = ({jwt, body}) => ({
+const generateOptions = ({body, jwt, url}) => ({
+  url,
   method: 'POST',
-  body: JSON.stringify(body),
+  body,
   headers: generateHeaders(jwt),
-  // api exposed by fetc-retry:
-  retries: 5,
-  retryDelay: 5000
+  json: true,
+  fullResponse: true,
+  // The below parameters are specific to request-retry
+  maxAttempts: 10, // (default) try 5 times
+  retryDelay: 5000, // (default) wait for 5s before trying again
+  retryStrategy: request.RetryStrategies.HTTPOrNetworkError // (default)
 })
 
 module.exports.api = {
   postMenu: ({baseUrl, jwt, menu}) =>
-    fetch(`${baseUrl}/api/menus`, generateOptions({jwt, body: menu}))
+    request(generateOptions({jwt, body: menu, url: `${baseUrl}/api/menus`}))
       .then(res => {
         console.log(`Menu: "${menu.title}" posted successfully`)
         return res
@@ -27,7 +31,9 @@ module.exports.api = {
       }),
 
   postProduct: ({baseUrl, jwt, product}) =>
-    fetch(`${baseUrl}/api/products`, generateOptions({jwt, body: product}))
+    request(
+      generateOptions({jwt, body: product, url: `${baseUrl}/api/products`})
+    )
       .then(res => {
         console.log(`Product: "${product.title}" posted successfully`)
         return res
