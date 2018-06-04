@@ -10,8 +10,8 @@ const generateOptions = ({jwt, body}) => ({
   body: JSON.stringify(body),
   headers: generateHeaders(jwt),
   // api exposed by fetc-retry:
-  retries: 10,
-  retryDelay: 1000
+  retries: 5,
+  retryDelay: 5000
 })
 
 module.exports.api = {

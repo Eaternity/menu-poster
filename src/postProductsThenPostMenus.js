@@ -13,6 +13,12 @@ module.exports.postProductsThenPostMenus = async ({
       console.log('-----------------------------------------------------------')
       console.log(`All ${responses.length} unique products posted successfully`)
       console.log('-----------------------------------------------------------')
+
+      responses.forEach(res => {
+        if (res.status !== 201) {
+          console.log(res)
+        }
+      })
     })
     .catch(err => console.error('Error posting products', err))
 
@@ -21,6 +27,12 @@ module.exports.postProductsThenPostMenus = async ({
       console.log('-----------------------------------------------------------')
       console.log(`All ${responses.length} menus posted successfully`)
       console.log('-----------------------------------------------------------')
+
+      responses.forEach(res => {
+        if (res.status !== 201) {
+          console.log(res)
+        }
+      })
     })
     .catch(err => console.error('Error posting menus', err))
 }
