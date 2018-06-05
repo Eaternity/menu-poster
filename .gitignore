@@ -59,3 +59,4 @@ typings/
 
 # private data
 data/*
+!data/.gitkeep 
