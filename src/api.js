@@ -12,34 +12,21 @@ const generateOptions = ({body, jwt, url}) => ({
   headers: generateHeaders(jwt),
   json: true,
   fullResponse: true,
-  // The below parameters are specific to request-retry
-  maxAttempts: 10, // (default) try 5 times
-  retryDelay: 5000, // (default) wait for 5s before trying again
+  /*
+  Without retry strategy an arbitrary number of menus did not get posted and the request returned different status codes all of which indicated that the
+  error could be recovered (503, 504 etc...). requestretry seems to solve the problem. The options below are specific to requestretry.
+   */
+  maxAttempts: 30, // (default) try 5 times
+  retryDelay: 7000, // (default) wait for 5s before trying again
   retryStrategy: request.RetryStrategies.HTTPOrNetworkError // (default)
 })
 
 module.exports.api = {
   postMenu: ({baseUrl, jwt, menu}) =>
-    request(generateOptions({jwt, body: menu, url: `${baseUrl}/api/menus`}))
-      .then(res => {
-        console.log(`Menu: "${menu.title}" posted successfully`)
-        return res
-      })
-      .catch(err => {
-        console.error(`Error posting menu: "${menu.title}"`)
-        throw new Error(err)
-      }),
+    request(generateOptions({jwt, body: menu, url: `${baseUrl}/api/menus`})),
 
   postProduct: ({baseUrl, jwt, product}) =>
     request(
       generateOptions({jwt, body: product, url: `${baseUrl}/api/products`})
     )
-      .then(res => {
-        console.log(`Product: "${product.title}" posted successfully`)
-        return res
-      })
-      .catch(err => {
-        console.error(`Error posting product: "${product.title}"`)
-        throw new Error(err)
-      })
 }

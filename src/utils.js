@@ -25,12 +25,13 @@ module.exports.generateProductionDate = week => {
   return productionDate
 }
 
+/*
+The idea is that this function will fill up the calendar view column by column (day by day)...
+ */
 module.exports.adjustProductionDateAndMenuLineId = ({
   menuLineId,
   productionDate
 }) => {
-  // idea is that this function will fill up the calendar view column by column
-  // (day by day)
   if (menuLineId > 21) {
     throw new Error(
       'more then 21 menus in a week. Menu will not show up in the UI'

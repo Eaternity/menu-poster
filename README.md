@@ -1,3 +1,3 @@
-# npm-project-boilerplate
+# menu-poster
 
-Start building your eaternity JavaScript project here
+Script for batch-POSTing menus and its components (products) to the eaternity-app node backend adn to eaternity-cloud.

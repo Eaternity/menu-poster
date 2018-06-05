@@ -1,7 +1,7 @@
 {
   "name": "menu-poster",
   "version": "1.0.0",
-  "description": "script fot batch posting menus to the eaternity-app node backend",
+  "description": "POST menus and its components (products) to the eaternity app node backend and to eaternity-cloud.",
   "main": "src/index.js",
   "scripts": {
     "test": "jest",

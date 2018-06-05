@@ -81,21 +81,25 @@ const main = async ({baseUrl, jwt, menuCollectionId, productCollectionId}) => {
           menuCollectionId
         })
       }),
-      // group menu collection by production date because there is only one
-      // date coming from the week given in the original data
+      /*
+      group menu collection by production date because there is only one
+      date coming from the week given in the original data
+       */
       groupBy(({productionDate}) => productionDate),
       mergeMap(group => group.pipe(toArray())),
       // map over menus grouped by production date and use index as menuLineId
-      // TODO: distribute menus over all days of the week
       map(menusGroupedByProductionDate => {
         const menusWithMenuLineInfo = menusGroupedByProductionDate.map(
           (menu, index) => {
-            // TODO: Spread menus out over the week to show them allProducts
             const menuLineId = index + 1
 
             return {
               ...menu,
               menuLineTitle: `Box ${menuLineId}`,
+              /*
+              adjustProductionDateAndMenuLineId adjusts productionDate and
+              menuLineId so the menus get spread out over the week in the Calendar view.
+              */
               ...adjustProductionDateAndMenuLineId({
                 menuLineId,
                 productionDate: menu.productionDate
@@ -122,11 +126,12 @@ const main = async ({baseUrl, jwt, menuCollectionId, productCollectionId}) => {
 
       const uniqueProducts = uniqBy(product => product.title, allProducts)
 
-      // Correct the product id! The menu potentiall contains
-      // products with null pointer ids because the products where
-      // made unique... Could for sure be done more elegantly by
-      // keeping track of all products from the beginning but I
-      // can't be bothered atm
+      /*
+      Correct the product id! The menu potentiall contains
+      products with null pointer ids because the products where
+      made unique... Could for sure be done more elegantly by
+      keeping track of all products from the beginning but...
+      */
       const menusWithUniqueProductIds = menus.map(menu => {
         const {components} = menu
         const componentsWithUniqueProductIds = components.map(component => {
