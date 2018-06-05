@@ -43,6 +43,7 @@
     "csvtojson": "^2.0.3",
     "fetch-retry": "^1.2.1",
     "moment": "^2.22.1",
+    "progress": "^2.0.0",
     "ramda": "^0.25.0",
     "requestretry": "^1.13.0",
     "rxjs": "^6.2.0",

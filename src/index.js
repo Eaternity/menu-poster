@@ -8,7 +8,8 @@ const {
   generateComponent,
   generateMenu,
   generateProduct,
-  generateProductionDate
+  generateProductionDate,
+  replaceWeirdChars
 } = require('./utils')
 const {postProductsThenPostMenus} = require('./postProductsThenPostMenus')
 
@@ -28,8 +29,12 @@ const main = async ({baseUrl, jwt, menuCollectionId, productCollectionId}) => {
       // comvert row data into right format
       map(jsonRow => {
         const rowWithCorrectKeys = {
-          ingredientAmount: jsonRow['4 people (g)'],
-          menuTitle: jsonRow['Recipe'],
+          /*
+          some amounts are given as decimals but with an ',' that needs to be
+          turned into a '.'
+           */
+          ingredientAmount: jsonRow['4 people (g)'].replace(',', '.'),
+          menuTitle: replaceWeirdChars(jsonRow['Recipe']),
           ingredientTitle: jsonRow['Ingredient (database)'],
           productionDate: generateProductionDate(jsonRow['week']),
           origin: jsonRow['Origin'],

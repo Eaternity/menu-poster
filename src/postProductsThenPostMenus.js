@@ -1,3 +1,4 @@
+const ProgressBar = require('progress')
 const {api} = require('./api')
 
 module.exports.postProductsThenPostMenus = async ({
@@ -6,8 +7,26 @@ module.exports.postProductsThenPostMenus = async ({
   menus,
   products
 }) => {
+  const menuBar = new ProgressBar('  posting menus [:bar] :percent', {
+    complete: '=',
+    incomplete: ' ',
+    width: 40,
+    total: menus.length,
+    clear: true
+  })
+
+  const productBar = new ProgressBar('  posting products [:bar] :percent', {
+    complete: '=',
+    incomplete: ' ',
+    width: 40,
+    total: menus.length,
+    clear: true
+  })
+
   await Promise.all(
-    products.map(product => api.postProduct({baseUrl, jwt, product}))
+    products.map(product =>
+      api.postProduct({baseUrl, jwt, product, productBar})
+    )
   )
     .then(responses => {
       const fails = responses
@@ -31,7 +50,9 @@ module.exports.postProductsThenPostMenus = async ({
     })
     .catch(err => console.error('Error posting products', err))
 
-  await Promise.all(menus.map(menu => api.postMenu({baseUrl, jwt, menu})))
+  await Promise.all(
+    menus.map(menu => api.postMenu({baseUrl, jwt, menu, menuBar}))
+  )
     .then(responses => {
       const fails = responses
         .filter(res => res.statusCode !== 201)

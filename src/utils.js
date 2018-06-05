@@ -81,3 +81,7 @@ module.exports.generateMenu = ({
   type: 'menu',
   components
 })
+
+module.exports.replaceWeirdChars = string => {
+  return string.replace('Ã¶', 'ö')
+}

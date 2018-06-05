@@ -22,11 +22,23 @@ const generateOptions = ({body, jwt, url}) => ({
 })
 
 module.exports.api = {
-  postMenu: ({baseUrl, jwt, menu}) =>
-    request(generateOptions({jwt, body: menu, url: `${baseUrl}/api/menus`})),
-
-  postProduct: ({baseUrl, jwt, product}) =>
+  postMenu: ({baseUrl, jwt, menu, menuBar}) =>
     request(
-      generateOptions({jwt, body: product, url: `${baseUrl}/api/products`})
-    )
+      generateOptions({jwt, body: menu, url: `${baseUrl}/api/menus`})
+    ).then(res => {
+      menuBar.tick()
+      return res
+    }),
+
+  postProduct: ({baseUrl, jwt, product, productBar}) =>
+    request(
+      generateOptions({
+        jwt,
+        body: product,
+        url: `${baseUrl}/api/products`
+      })
+    ).then(res => {
+      productBar.tick()
+      return res
+    })
 }
