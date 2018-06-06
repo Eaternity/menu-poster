@@ -45,8 +45,6 @@
     "moment": "^2.22.1",
     "progress": "^2.0.0",
     "ramda": "^0.25.0",
-    "requestretry": "^1.13.0",
-    "rxjs": "^6.2.0",
-    "universal-rxjs-ajax": "^2.0.0"
+    "requestretry": "^1.13.0"
   }
 }

@@ -1,170 +1,49 @@
-const {catchError, groupBy, map, mergeMap, toArray} = require('rxjs/operators')
-const {from} = require('rxjs')
-const {uniqBy} = require('ramda')
 const csv = require('csvtojson')
 
-const {
-  adjustProductionDateAndMenuLineId,
-  generateComponent,
-  generateMenu,
-  generateProduct,
-  generateProductionDate,
-  replaceWeirdChars
-} = require('./utils')
+const {parse} = require('./parsers/willemDrees')
 const {postProductsThenPostMenus} = require('./postProductsThenPostMenus')
 
-const csvFilePath = './data/willemDrees.csv'
+const main = async ({
+  baseUrl,
+  dryrun,
+  jwt,
+  menuCollectionId,
+  productCollectionId,
+  sourceFile
+}) => {
+  try {
+    const rawData = await csv({
+      delimiter: ';',
+      noheader: false,
+      trim: true
+    }).fromFile(sourceFile)
 
-const main = async ({baseUrl, jwt, menuCollectionId, productCollectionId}) => {
-  const rowArray = await csv({
-    delimiter: ';',
-    noheader: false,
-    trim: true
-  }).fromFile(csvFilePath)
+    const {menus, products} = parse({
+      rawData,
+      menuCollectionId,
+      productCollectionId
+    })
 
-  const source = from(rowArray)
-
-  source
-    .pipe(
-      // comvert row data into right format
-      map(jsonRow => {
-        const rowWithCorrectKeys = {
-          /*
-          some amounts are given as decimals but with an ',' that needs to be
-          turned into a '.'
-           */
-          ingredientAmount: jsonRow['4 people (g)'].replace(',', '.'),
-          menuTitle: replaceWeirdChars(jsonRow['Recipe']),
-          ingredientTitle: jsonRow['Ingredient (database)'],
-          productionDate: generateProductionDate(jsonRow['week']),
-          origin: jsonRow['Origin'],
-          transport: jsonRow['Transport'],
-          production: jsonRow['Production'],
-          preservation: jsonRow['Preservation'],
-          processing: jsonRow['Processing']
-        }
-
-        return rowWithCorrectKeys
-      }),
-      // group row data by menu title
-      groupBy(({menuTitle}) => menuTitle),
-      mergeMap(group => group.pipe(toArray())),
-      // extract components and generate a menu from each group
-      map(dataGroupedByMenu => {
-        const [{menuTitle, productionDate}] = dataGroupedByMenu
-
-        const components = dataGroupedByMenu.map(
-          ({
-            ingredientAmount,
-            ingredientTitle,
-            origin,
-            preservation,
-            processing,
-            production,
-            transport
-          }) => {
-            const product = generateProduct({
-              title: ingredientTitle,
-              productCollectionId,
-              configurationPossibilities: {
-                origin,
-                transport,
-                production,
-                preservation,
-                processing
-              }
-            })
-
-            return generateComponent({amount: ingredientAmount, product})
-          }
-        )
-
-        return generateMenu({
-          components,
-          title: menuTitle,
-          productionDate,
-          menuCollectionId
-        })
-      }),
-      /*
-      group menu collection by production date because there is only one
-      date coming from the week given in the original data
-       */
-      groupBy(({productionDate}) => productionDate),
-      mergeMap(group => group.pipe(toArray())),
-      // map over menus grouped by production date and use index as menuLineId
-      map(menusGroupedByProductionDate => {
-        const menusWithMenuLineInfo = menusGroupedByProductionDate.map(
-          (menu, index) => {
-            const menuLineId = index + 1
-
-            return {
-              ...menu,
-              menuLineTitle: `Box ${menuLineId}`,
-              /*
-              adjustProductionDateAndMenuLineId adjusts productionDate and
-              menuLineId so the menus get spread out over the week in the Calendar view.
-              */
-              ...adjustProductionDateAndMenuLineId({
-                menuLineId,
-                productionDate: menu.productionDate
-              })
-            }
-          }
-        )
-
-        return menusWithMenuLineInfo
-      }),
-      // get rid of the productionDate grouping
-      toArray(),
-      map(menus => menus.reduce((prev, curr) => [...prev, ...curr])),
-      catchError(err => console.error(err))
-    )
-    .subscribe(menus => {
-      const allProducts = menus.reduce(
-        (acc, menu) => [
-          ...acc,
-          ...menu.components.map(({component}) => component)
-        ],
-        []
-      )
-
-      const uniqueProducts = uniqBy(product => product.title, allProducts)
-
-      /*
-      Correct the product id! The menu potentiall contains
-      products with null pointer ids because the products where
-      made unique... Could for sure be done more elegantly by
-      keeping track of all products from the beginning but...
-      */
-      const menusWithUniqueProductIds = menus.map(menu => {
-        const {components} = menu
-        const componentsWithUniqueProductIds = components.map(component => {
-          const uniqueProduct = uniqueProducts.find(
-            product => product.title === component.component.title
-          )
-          return {
-            ...component,
-            component: uniqueProduct
-          }
-        })
-
-        return {
-          ...menu,
-          components: componentsWithUniqueProductIds
-        }
-      })
-
+    if (!dryrun) {
       postProductsThenPostMenus({
         baseUrl,
         jwt,
-        menus: menusWithUniqueProductIds,
-        products: uniqueProducts
+        menus,
+        products
       })
-    })
+    } else {
+      // log stuff out for debugging here
+      console.log('number of menus', menus.length)
+      console.log('number of products', products.length)
+    }
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 main({
+  dryrun: true, // when true nothing is POSTed
+  sourceFile: './data/willemDrees.csv',
   baseUrl: 'https://carrot.eaternity.ch',
   menuCollectionId: '2ca26df3-7947-482f-80b8-430b1de424a8',
   productCollectionId: 'e2273b22-7b66-4920-a134-63ae9f0864af',
