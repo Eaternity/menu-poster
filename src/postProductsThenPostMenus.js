@@ -31,9 +31,9 @@ module.exports.postProductsThenPostMenus = async ({
     .then(responses => {
       const fails = responses
         .filter(res => res.statusCode !== 201)
-        .map(({request: {body}, statusCode}) => {
+        .map(({request: {body}, attempts, statusCode}) => {
           const {id, title, type} = JSON.parse(body)
-          return {statusCode, id, title, type}
+          return {statusCode, id, title, attempts, type}
         })
 
       if (fails.length === 0) {
