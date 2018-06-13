@@ -1,6 +1,7 @@
 const moment = require('moment')
-const hash = require('object-hash')
+
 const {v4} = require('uuid')
+const hash = require('object-hash')
 
 module.exports.generateProduct = ({
   configurationPossibilities,

@@ -32,31 +32,31 @@ const main = async ({
         products
       })
     } else {
-      console.log(
-        'manually post supplies in file ' +
-          suppliesOutputFile +
-          ' to eaternity cloud.'
-      )
-
-      var i,
-        j,
-        temparray,
-        chunk = 50
-      for (i = 0, j = supplies.length; i < j; i += chunk) {
-        temparray = supplies.slice(i, i + chunk)
-        fs.writeFile(
-          suppliesOutputFile(i),
-          JSON.stringify(temparray, null, 2),
-          function(err) {
-            if (err) {
-              console.log(err)
-            }
-          }
-        )
-      }
       // log stuff out for debugging here
       console.log('number of menus', menus.length)
       console.log('number of products', products.length)
+    }
+    console.log(
+      'manually post supplies in file ' +
+        suppliesOutputFile +
+        ' to eaternity cloud.'
+    )
+
+    var i,
+      j,
+      temparray,
+      chunk = 50
+    for (i = 0, j = supplies.length; i < j; i += chunk) {
+      temparray = supplies.slice(i, i + chunk)
+      fs.writeFile(
+        suppliesOutputFile(i),
+        JSON.stringify(temparray, null, 2),
+        function(err) {
+          if (err) {
+            console.log(err)
+          }
+        }
+      )
     }
   } catch (err) {
     console.error(err)
