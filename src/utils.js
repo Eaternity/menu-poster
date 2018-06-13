@@ -65,6 +65,7 @@ module.exports.generateMenu = ({
   productionDate,
   menuLineId,
   menuCollectionId,
+  salesNumber,
   title = ''
 }) => ({
   id: v4(),
@@ -74,6 +75,7 @@ module.exports.generateMenu = ({
   productionDate,
   menuLineId,
   menuLineTitle: '',
+  salesNumber,
   servings: 4,
   serviceStatus: {
     cloudStatus: cloudStatus || 200

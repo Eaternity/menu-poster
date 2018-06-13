@@ -1,5 +1,5 @@
 const {groupBy, map, pipe, reduce, uniqBy, values} = require('ramda')
-
+const hash = require('object-hash')
 const {
   adjustProductionDateAndMenuLineId,
   generateComponent,
@@ -21,7 +21,10 @@ module.exports.parse = ({menuCollectionId, productCollectionId, rawData}) => {
     productionDate: generateProductionDate(jsonRow['week']),
     origin: jsonRow['Origin'],
     transport: jsonRow['Transport'],
-    production: jsonRow['Production'],
+    production: jsonRow['Production']
+      .replace('/', ',')
+      .replace('sustainable', 'sustainable-fish')
+      .replace('wild', 'wild-caught'),
     preservation: jsonRow['Preservation'],
     processing: jsonRow['Processing'],
     salesNumber:
@@ -32,15 +35,15 @@ module.exports.parse = ({menuCollectionId, productCollectionId, rawData}) => {
 
   const addTemporaryId = map(jsonRow => ({
     ...jsonRow,
-    id: `${jsonRow.menuTitle}_${jsonRow.productionDate}`
+    id: `${jsonRow.menuTitle}_${jsonRow.productionDate}_${jsonRow.salesNumber}`
   }))
 
   const groupById = groupBy(menu => menu.id)
 
-  const convertToMenu = map(dataByMenuTitle => {
-    const [{menuTitle, productionDate}] = dataByMenuTitle
+  const convertToMenu = map(dataByCustomId => {
+    const [{menuTitle, productionDate, salesNumber}] = dataByCustomId
 
-    const components = dataByMenuTitle.map(
+    const components = dataByCustomId.map(
       ({
         ingredientAmount,
         ingredientTitle,
@@ -68,6 +71,7 @@ module.exports.parse = ({menuCollectionId, productCollectionId, rawData}) => {
 
     return generateMenu({
       components,
+      salesNumber,
       title: menuTitle,
       productionDate,
       menuCollectionId
@@ -144,5 +148,78 @@ module.exports.parse = ({menuCollectionId, productCollectionId, rawData}) => {
     }
   })
 
-  return {menus: menusWithUniqueProductIds, products: uniqueProducts}
+  //example
+  // [
+  //   {
+  //     'request-id': 0,
+  //     supply: {
+  //       supplier: 'Howeg',
+  //       'supply-date': '2014-6-01',
+  //       ingredients: [
+  //         {
+  //           id: '170',
+  //           names: [
+  //             {language: 'fr', value: "L'huile de colza"},
+  //             {language: 'de', value: 'Rapsöl'}
+  //           ],
+  //           origin: 'Mongolei',
+  //           amount: 2047,
+  //           transport: 'ground',
+  //           production: 'wild-caught',
+  //           processing: 'unboned',
+  //           conservation: 'canned',
+  //           packaging: 'cardboard',
+  //           unit: 'gram',
+  //           producer: 'Unilever Schweiz GmbH',
+  //           storage: 3,
+  //           price: 1.2
+  //         }
+  //       ]
+  //     }
+  //   }
+  // ]
+  //
+  // { id: 'c13f663a-2b15-4e78-be6d-08ef6ae65ac1',
+  // menuCollectionId: '1dcb1b69-e9dd-4031-b782-b7fe6b13ffa9',
+  // title: 'Aardappelpuree, geroosterde pompoen en koolsalade',
+  // imageUrl: '',
+  // productionDate: '2017-01-02',
+  // menuLineId: 1,
+  // menuLineTitle: 'Box 1',
+  // servings: 4,
+  // serviceStatus: { cloudStatus: 200 },
+  // type: 'menu',
+  // components:
+  //  [ { section: '', component: [Object], quantity: [Object] },
+  //    { section: '', component: [Object], quantity: [Object] },
+  //    { section: '', component: [Object], quantity: [Object] },
+  //    { section: '', component: [Object], quantity: [Object] },
+  //    { section: '', component: [Object], quantity: [Object] },
+  //    { section: '', component: [Object], quantity: [Object] },
+  //    { section: '', component: [Object], quantity: [Object] },
+  //    { section: '', component: [Object], quantity: [Object] },
+  //    { section: '', component: [Object], quantity: [Object] } ] }
+  const supplies = menusWithUniqueProductIds.map((menu, index) => ({
+    'request-id': index,
+    supply: {
+      'supply-date': menu.productionDate,
+      id: hash(menu),
+      ingredients: menu.components.map(component => ({
+        amount: (component.quantity.amount / 4) * menu.salesNumber,
+        unit: 'gram',
+        id: component.component.id,
+        names: [
+          {language: 'de', value: component.component.title},
+          {language: 'nl', value: component.component.title}
+        ],
+        origin: component.component.configurationPossibilities.origin,
+        transport: component.component.configurationPossibilities.transport,
+        production: component.component.configurationPossibilities.production,
+        preservation:
+          component.component.configurationPossibilities.preservation,
+        processing: component.component.configurationPossibilities.processing
+      }))
+    }
+  }))
+  return {supplies, menus: menusWithUniqueProductIds, products: uniqueProducts}
 }
