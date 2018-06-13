@@ -1,10 +1,15 @@
 const csv = require('csvtojson')
-var fs = require('fs')
+
+const {api} = require('./api')
 const {parse} = require('./parsers/willemDrees')
 const {postProductsThenPostMenus} = require('./postProductsThenPostMenus')
 
+var fs = require('fs')
+
 const main = async ({
+  apiKey,
   baseUrl,
+  cloudUrl,
   dryrun,
   jwt,
   menuCollectionId,
@@ -48,6 +53,9 @@ const main = async ({
       chunk = 50
     for (i = 0, j = supplies.length; i < j; i += chunk) {
       temparray = supplies.slice(i, i + chunk)
+      if (!dryrun) {
+        api.postSupplies({cloudUrl, apiKey, supplyRequests: temparray})
+      }
       fs.writeFile(
         suppliesOutputFile(i),
         JSON.stringify(temparray, null, 2),
@@ -66,8 +74,10 @@ const main = async ({
 main({
   dryrun: true, // when true nothing is POSTed
   sourceFile: './data/willemDrees.csv',
+  apiKey: 'sadfasdfasdf',
   suppliesOutputFile: id => `./data/supplies${id}.json`,
   baseUrl: 'https://carrot.eaternity.ch',
+  cloudUrl: 'https://develop-dot-webservice-dot-eaternity-cloud-2.appspot.com/',
   menuCollectionId: '1dcb1b69-e9dd-4031-b782-b7fe6b13ffa9',
   productCollectionId: 'd757f97e-a4f4-4ff5-b3a9-93ffb0209524',
   jwt:

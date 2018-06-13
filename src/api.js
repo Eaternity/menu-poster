@@ -40,5 +40,27 @@ module.exports.api = {
     ).then(res => {
       productBar.tick()
       return res
+    }),
+  postSupplies: ({cloudUrl, apiKey, supplyRequests}) => {
+    request({
+      url: cloudUrl,
+      method: 'POST',
+      body: supplyRequests,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${apiKey}`
+      },
+      json: true,
+      fullResponse: true,
+      /*
+      Without retry strategy an arbitrary number of menus did not get posted and the request returned different status codes all of which indicated that the
+      error could be recovered (503, 504 etc...). requestretry seems to solve the problem. The options below are specific to requestretry.
+       */
+      maxAttempts: 2, // (default) try 5 times
+      retryDelay: 7000, // (default) wait for 5s before trying again
+      retryStrategy: request.RetryStrategies.HTTPOrNetworkError // (default)
+    }).then(res => {
+      console.log(res)
     })
+  }
 }
