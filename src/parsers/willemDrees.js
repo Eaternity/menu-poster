@@ -199,7 +199,6 @@ module.exports.parse = ({menuCollectionId, productCollectionId, rawData}) => {
   //    { section: '', component: [Object], quantity: [Object] },
   //    { section: '', component: [Object], quantity: [Object] },
   //    { section: '', component: [Object], quantity: [Object] } ] }
-  console.log(JSON.stringify(menusWithUniqueProductIds[0], null, 2))
   const supplies = menusWithUniqueProductIds.map((menu, index) => ({
     'request-id': index,
     supply: {
