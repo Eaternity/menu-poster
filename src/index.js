@@ -51,10 +51,13 @@ const main = async ({
       j,
       temparray,
       chunk = 50
+    var succesfulSupplyPosts = 0
     for (i = 0, j = supplies.length; i < j; i += chunk) {
       temparray = supplies.slice(i, i + chunk)
       if (!dryrun) {
-        api.postSupplies({cloudUrl, apiKey, supplyRequests: temparray})
+        api
+          .postSupplies({cloudUrl, apiKey, supplyRequests: temparray})
+          .then(console.log(succesfulSupplyPosts++))
       }
       fs.writeFile(
         suppliesOutputFile(i),
@@ -72,14 +75,15 @@ const main = async ({
 }
 
 main({
-  dryrun: true, // when true nothing is POSTed
+  dryrun: false, // when true nothing is POSTed
   sourceFile: './data/willemDrees.csv',
-  apiKey: 'sadfasdfasdf',
+  apiKey: 'MWg1c2Z6ZTRkNWoybXVhNDFmbndlMnlldjU5aDJnZTc=',
   suppliesOutputFile: id => `./data/supplies${id}.json`,
   baseUrl: 'https://carrot.eaternity.ch',
-  cloudUrl: 'https://develop-dot-webservice-dot-eaternity-cloud-2.appspot.com/',
-  menuCollectionId: '1dcb1b69-e9dd-4031-b782-b7fe6b13ffa9',
-  productCollectionId: 'd757f97e-a4f4-4ff5-b3a9-93ffb0209524',
+  cloudUrl:
+    'https://develop-dot-webservice-dot-eaternity-cloud-2.appspot.com/api/kitchens/8e17bd3b-c752-4ff9-86b9-62b112df6b71/supplies/batch',
+  menuCollectionId: '8e17bd3b-c752-4ff9-86b9-62b112df6b71',
+  productCollectionId: 'bd5b473e-b9fd-44ce-b42b-cb460eb78039',
   jwt:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiIiwiZW1haWwiOiJqaGlua2VsbWFubit3ZDZAZWF0ZXJuaXR5LmNoIiwiZmlyc3ROYW1lIjoiIiwibGFzdE5hbWUiOiIifSwiaWF0IjoxNTI4Nzk5NDc0LCJleHAiOjE1Mjg4ODU4NzR9.0JAYSZ9mTyb357gCPb9MVb1B8eyAZj0oQlM80xbSZUg'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiIiwiZW1haWwiOiJqaGlua2VsbWFubit3ZC1zdXBwbGllczFAZWF0ZXJuaXR5LmNoIiwiZmlyc3ROYW1lIjoiIiwibGFzdE5hbWUiOiIifSwiaWF0IjoxNTI4ODgzMzMwLCJleHAiOjE1Mjg5Njk3MzB9.qmFeV1rpqJVRM_EF2BMdWu3CNthfldlem6LZ_mgN_xc'
 })

@@ -1,5 +1,5 @@
 const {groupBy, map, pipe, reduce, uniqBy, values} = require('ramda')
-
+const hash = require('object-hash')
 const {
   adjustProductionDateAndMenuLineId,
   generateComponent,
@@ -8,6 +8,7 @@ const {
   generateProductionDate,
   replaceWeirdChars
 } = require('../utils')
+
 module.exports.parse = ({menuCollectionId, productCollectionId, rawData}) => {
   const extractFields = map(jsonRow => ({
     /*
@@ -203,7 +204,7 @@ module.exports.parse = ({menuCollectionId, productCollectionId, rawData}) => {
     'request-id': index,
     supply: {
       'supply-date': menu.productionDate,
-      id: menu.id,
+      id: hash(menu),
       ingredients: menu.components.map(component => ({
         amount: (component.quantity.amount / 4) * menu.salesNumber,
         unit: 'gram',
