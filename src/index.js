@@ -31,47 +31,29 @@ const main = async ({
         menus,
         products
       })
-      //example
-      // [
-      //   {
-      //     'request-id': 0,
-      //     supply: {
-      //       supplier: 'Howeg',
-      //       'supply-date': '2014-6-01',
-      //       ingredients: [
-      //         {
-      //           id: '170',
-      //           names: [
-      //             {language: 'fr', value: "L'huile de colza"},
-      //             {language: 'de', value: 'Rapsöl'}
-      //           ],
-      //           origin: 'Mongolei',
-      //           amount: 2047,
-      //           transport: 'ground',
-      //           production: 'wild-caught',
-      //           processing: 'unboned',
-      //           conservation: 'canned',
-      //           packaging: 'cardboard',
-      //           unit: 'gram',
-      //           producer: 'Unilever Schweiz GmbH',
-      //           storage: 3,
-      //           price: 1.2
-      //         }
-      //       ]
-      //     }
-      //   }
-      // ]
+    } else {
       console.log(
         'manually post supplies in file ' +
           suppliesOutputFile +
           ' to eaternity cloud.'
       )
-      fs.writeFile(suppliesOutputFile, supplies, function(err) {
-        if (err) {
-          console.log(err)
-        }
-      })
-    } else {
+
+      var i,
+        j,
+        temparray,
+        chunk = 50
+      for (i = 0, j = supplies.length; i < j; i += chunk) {
+        temparray = supplies.slice(i, i + chunk)
+        fs.writeFile(
+          suppliesOutputFile(i),
+          JSON.stringify(temparray, null, 2),
+          function(err) {
+            if (err) {
+              console.log(err)
+            }
+          }
+        )
+      }
       // log stuff out for debugging here
       console.log('number of menus', menus.length)
       console.log('number of products', products.length)
@@ -82,9 +64,9 @@ const main = async ({
 }
 
 main({
-  dryrun: false, // when true nothing is POSTed
+  dryrun: true, // when true nothing is POSTed
   sourceFile: './data/willemDrees.csv',
-  suppliesOutputFile: './data/supplies.json',
+  suppliesOutputFile: id => `./data/supplies${id}.json`,
   baseUrl: 'https://carrot.eaternity.ch',
   menuCollectionId: '1dcb1b69-e9dd-4031-b782-b7fe6b13ffa9',
   productCollectionId: 'd757f97e-a4f4-4ff5-b3a9-93ffb0209524',
