@@ -42,7 +42,7 @@ module.exports.api = {
       return res
     }),
   postSupplies: ({cloudUrl, apiKey, supplyRequests}) => {
-    request({
+    return request({
       url: cloudUrl,
       method: 'POST',
       body: supplyRequests,
@@ -59,8 +59,6 @@ module.exports.api = {
       maxAttempts: 2, // (default) try 5 times
       retryDelay: 7000, // (default) wait for 5s before trying again
       retryStrategy: request.RetryStrategies.HTTPOrNetworkError // (default)
-    }).then(res => {
-      console.log(res)
     })
   }
 }

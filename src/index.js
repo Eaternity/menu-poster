@@ -41,11 +41,6 @@ const main = async ({
       console.log('number of menus', menus.length)
       console.log('number of products', products.length)
     }
-    console.log(
-      'manually post supplies in file ' +
-        suppliesOutputFile +
-        ' to eaternity cloud.'
-    )
 
     var i,
       j,
@@ -77,13 +72,13 @@ const main = async ({
 main({
   dryrun: false, // when true nothing is POSTed
   sourceFile: './data/willemDrees.csv',
-  apiKey: 'MWg1c2Z6ZTRkNWoybXVhNDFmbndlMnlldjU5aDJnZTc=',
+  apiKey: 'M3Y1ZzR5OGc4ZHo3NnRqbnU5bjc5MG5xNnVjbTN6bWg=',
   suppliesOutputFile: id => `./data/supplies${id}.json`,
   baseUrl: 'https://carrot.eaternity.ch',
   cloudUrl:
-    'https://develop-dot-webservice-dot-eaternity-cloud-2.appspot.com/api/kitchens/8e17bd3b-c752-4ff9-86b9-62b112df6b71/supplies/batch',
-  menuCollectionId: '8e17bd3b-c752-4ff9-86b9-62b112df6b71',
-  productCollectionId: 'bd5b473e-b9fd-44ce-b42b-cb460eb78039',
+    'https://develop-dot-webservice-dot-eaternity-cloud-2.appspot.com/api/kitchens/ebf192e3-4c30-40d3-9869-3b30ddecbbdb/supplies/batch',
+  menuCollectionId: 'ebf192e3-4c30-40d3-9869-3b30ddecbbdb',
+  productCollectionId: 'cb682cd4-b400-4895-ae95-9fe9fd26b91b',
   jwt:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiIiwiZW1haWwiOiJqaGlua2VsbWFubit3ZC1zdXBwbGllczFAZWF0ZXJuaXR5LmNoIiwiZmlyc3ROYW1lIjoiIiwibGFzdE5hbWUiOiIifSwiaWF0IjoxNTI4ODgzMzMwLCJleHAiOjE1Mjg5Njk3MzB9.qmFeV1rpqJVRM_EF2BMdWu3CNthfldlem6LZ_mgN_xc'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFiMjRkMjM2LTU2ZGEtNDI1OS05OGNkLTcyZTViYjc5YzM2NyIsImlhdCI6MTUyODg4NTk5OSwiZXhwIjoxNTI4OTcyMzk5fQ.chMwKYaDI7TTrHh5-9N2h_oqZV9uZLlMWgBqtd45c_E'
 })
