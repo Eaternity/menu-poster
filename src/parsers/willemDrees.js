@@ -134,7 +134,10 @@ module.exports.parse = ({menuCollectionId, productCollectionId, rawData}) => {
       )
       return {
         ...component,
-        component: uniqueProduct
+        component: {
+          id: uniqueProduct.id,
+          type: uniqueProduct.type
+        }
       }
     })
 
