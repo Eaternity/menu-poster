@@ -16,7 +16,7 @@ const generateOptions = ({body, jwt, url}) => ({
   Without retry strategy an arbitrary number of menus did not get posted and the request returned different status codes all of which indicated that the
   error could be recovered (503, 504 etc...). requestretry seems to solve the problem. The options below are specific to requestretry.
    */
-  maxAttempts: 2, // (default) try 5 times
+  maxAttempts: 20, // (default) try 5 times
   retryDelay: 7000, // (default) wait for 5s before trying again
   retryStrategy: request.RetryStrategies.HTTPOrNetworkError // (default)
 })
