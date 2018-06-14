@@ -71,14 +71,14 @@ const main = async ({
 
 main({
   dryrun: false, // when true nothing is POSTed
-  sourceFile: './data/willemDreesSmall.csv',
-  apiKey: 'MTg5djV2cGI3bzZpNGc2Zjd2dnA0aGMzYWI5Z2doMG0=',
+  sourceFile: './data/willemDrees.csv',
+  apiKey: 'asldfkjadfjsöslakdjfölsakdjföalsdkjfölasdjk=',
   suppliesOutputFile: id => `./data/supplies${id}.json`,
-  baseUrl: 'https://carrot.eaternity.ch',
+  baseUrl: 'https://demo.eaternity.ch',
   cloudUrl:
-    'https://develop-dot-webservice-dot-eaternity-cloud-2.appspot.com/api/kitchens//supplies/batch',
-  menuCollectionId: '487f7d51-e992-460d-bdf5-ed242d3f61d1',
-  productCollectionId: '88b22672-f5eb-4f97-9df1-0441ed40a6c8',
+    'https://develop-dot-webservice-dot-eaternity-app.appspot.com/api/kitchens/00b88f92-d8d3-4a0b-8611-8042660ee35d/supplies/batch',
+  menuCollectionId: '00b88f92-d8d3-4a0b-8611-8042660ee35d',
+  productCollectionId: '773e3c22-3de2-48c3-8b62-3014ebcf21c4',
   jwt:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiIiwiZW1haWwiOiJjcnVnb3BlamVzQDJlbWVhLmNvbSIsImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiIn0sImlhdCI6MTUyODg5Mzc5NywiZXhwIjoxNTI4OTgwMTk3fQ.0_txC6ioVBsKtN-2j15uX1k9reUp3pee_gJkYWaRmtc'
+    'eyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUIeyIZUI'
 })
